@@ -26,7 +26,7 @@ case "$os" in
     ;;
 esac
 
-version=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name"' | sed 's/.*"tag_name": *"\(.*\)".*/\1/')
+version=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name"' | cut -d'"' -f4)
 
 if [ -z "$version" ]; then
   echo "Could not determine latest version"
@@ -43,6 +43,6 @@ echo "Downloading skpm $version..."
 curl -fsSL "$url" -o "$tmp/$archive"
 tar -xzf "$tmp/$archive" -C "$tmp"
 
-install -m 755 "$tmp/$BINARY" "$INSTALL_DIR/$BINARY"
+sudo install -m 755 "$tmp/$BINARY" "$INSTALL_DIR/$BINARY"
 
 echo "Installed skpm $version to $INSTALL_DIR/$BINARY"
