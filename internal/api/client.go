@@ -11,7 +11,7 @@ import (
 	"github.com/skpm-dev/cli/internal/models"
 )
 
-const registryURL = "http://localhost:8080"
+const registryURL = "https://skpm-registry-production.up.railway.app"
 
 type publishRequest struct {
 	Manifest manifest.Manifest `json:"manifest"`
