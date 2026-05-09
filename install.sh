@@ -43,6 +43,20 @@ echo "Downloading skpm $version..."
 curl -fsSL "$url" -o "$tmp/$archive"
 tar -xzf "$tmp/$archive" -C "$tmp"
 
-sudo install -m 755 "$tmp/$BINARY" "$INSTALL_DIR/$BINARY"
+binary=$(find "$tmp" -name "$BINARY" -type f | head -1)
+
+if [ -z "$binary" ]; then
+  echo "Could not find $BINARY in downloaded archive"
+  exit 1
+fi
+
+chmod +x "$binary"
+
+if [ -w "$INSTALL_DIR" ]; then
+  cp "$binary" "$INSTALL_DIR/$BINARY"
+else
+  echo "Installing to $INSTALL_DIR (you may be prompted for your password)..."
+  sudo cp "$binary" "$INSTALL_DIR/$BINARY"
+fi
 
 echo "Installed skpm $version to $INSTALL_DIR/$BINARY"
