@@ -17,7 +17,13 @@ Add this to your `~/.zshrc` or `~/.bashrc` to make it permanent.
 
 ## Installation
 
-Download the latest binary from the releases page and place it on your `PATH`.
+```sh
+curl -fsSL https://raw.githubusercontent.com/skpm-dev/cli/main/install.sh | sh
+```
+
+This downloads the latest release for your OS and installs `skpm` to `/usr/local/bin`. You may be prompted for your password.
+
+Windows users: download the binary from the [releases page](https://github.com/skpm-dev/cli/releases).
 
 ## Publishing a package
 
