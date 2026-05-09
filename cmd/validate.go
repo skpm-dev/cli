@@ -16,6 +16,7 @@ var validateCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(validateCmd)
 }
+
 func runValidate(cmd *cobra.Command, args []string) error {
 	m, err := manifest.Load("skpm.json")
 	if err != nil {

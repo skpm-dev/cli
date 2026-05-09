@@ -33,24 +33,24 @@ func Load(path string) (*Manifest, error) {
 }
 
 func Validate(m *Manifest) error {
-	required := map[string]string{
-		"name":        m.Name,
-		"description": m.Description,
-		"author":      m.Author,
-		"version":     m.Version,
-		"repo":        m.Repo,
+	if m.Name == "" {
+		return fmt.Errorf("missing required field: name")
 	}
-
-	for field, value := range required {
-		if value == "" {
-			return fmt.Errorf("missing required field: %s", field)
-		}
+	if m.Description == "" {
+		return fmt.Errorf("missing required field: description")
 	}
-
+	if m.Author == "" {
+		return fmt.Errorf("missing required field: author")
+	}
+	if m.Version == "" {
+		return fmt.Errorf("missing required field: version")
+	}
+	if m.Repo == "" {
+		return fmt.Errorf("missing required field: repo")
+	}
 	if len(m.Files) == 0 {
 		return fmt.Errorf("files must contain at least one .sk file")
 	}
-
 	return nil
 }
 
