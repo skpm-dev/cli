@@ -53,3 +53,16 @@ func Validate(m *Manifest) error {
 
 	return nil
 }
+
+func Save(m *Manifest, path string) error {
+	data, err := json.MarshalIndent(m, "", "  ")
+	if err != nil {
+		return fmt.Errorf("could not encode manifest: %w", err)
+	}
+
+	if err := os.WriteFile(path, data, 0644); err != nil {
+		return fmt.Errorf("could not write %s: %w", path, err)
+	}
+
+	return nil
+}
