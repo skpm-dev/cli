@@ -6,9 +6,9 @@ import (
 	"os"
 	"strings"
 
+	"github.com/skpm-dev/cli/internal/api"
 	"github.com/skpm-dev/cli/internal/github"
 	"github.com/skpm-dev/cli/internal/manifest"
-	"github.com/skpm-dev/cli/internal/registry"
 	"github.com/skpm-dev/cli/internal/version"
 	"github.com/spf13/cobra"
 )
@@ -33,7 +33,12 @@ func runPublish(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("invalid manifest: %w", err)
 	}
 
-	existing, err := registry.Fetch(m.Name)
+	token, err := github.Token()
+	if err != nil {
+		return err
+	}
+
+	existing, err := api.GetPackage(m.Name)
 	if err != nil {
 		return fmt.Errorf("could not check registry: %w", err)
 	}
@@ -50,52 +55,33 @@ func runPublish(cmd *cobra.Command, args []string) error {
 		fmt.Printf("Bumped version to %s in skpm.json\n", m.Version)
 	}
 
-	client, err := github.NewClient()
+	files, err := readFiles(m.Files)
 	if err != nil {
 		return err
 	}
 
-	parts := strings.SplitN(m.Repo, "/", 2)
-	if len(parts) != 2 {
-		return fmt.Errorf("repo must be in format owner/repo, got %q", m.Repo)
-	}
-	owner, repo := parts[0], parts[1]
+	fmt.Printf("Publishing %s@%s...\n", m.Name, m.Version)
 
-	tag := "v" + m.Version
-	fmt.Printf("Creating GitHub release %s...\n", tag)
-
-	release, err := client.CreateRelease(owner, repo, tag, m.Version)
-	if err != nil {
-		return fmt.Errorf("could not create release: %w", err)
+	if err := api.Publish(token, m, files); err != nil {
+		return fmt.Errorf("publish failed: %w", err)
 	}
 
-	fileURLs := make(map[string]string)
-	for _, file := range m.Files {
-		fmt.Printf("Uploading %s...\n", file)
-		url, err := client.UploadReleaseAsset(release, file)
-		if err != nil {
-			return fmt.Errorf("could not upload %s: %w", file, err)
-		}
-		fileURLs[file] = url
-	}
-
-	var entry *registry.PackageEntry
-	if existing != nil {
-		entry = registry.Merge(existing, m, fileURLs)
-	} else {
-		entry = registry.Build(m, fileURLs)
-	}
-
-	entryJSON, err := registry.Marshal(entry)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println("Opening PR to skpm-dev/registry...")
-	fmt.Printf("\nPackage entry that will be submitted:\n\n%s\n", string(entryJSON))
-	fmt.Println("(PR creation coming in next step)")
-
+	fmt.Printf("Published %s@%s\n", m.Name, m.Version)
 	return nil
+}
+
+func readFiles(filenames []string) (map[string]string, error) {
+	files := make(map[string]string, len(filenames))
+
+	for _, name := range filenames {
+		content, err := os.ReadFile(name)
+		if err != nil {
+			return nil, fmt.Errorf("could not read file %s: %w", name, err)
+		}
+		files[name] = string(content)
+	}
+
+	return files, nil
 }
 
 func promptVersionBump(current string) (string, error) {
