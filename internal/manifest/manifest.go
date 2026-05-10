@@ -32,6 +32,13 @@ func Load(path string) (*Manifest, error) {
 	return &m, nil
 }
 
+var placeholders = []string{
+	"my-package",
+	"your-github-username",
+	"your-repo",
+	"A short description of your package",
+}
+
 func Validate(m *Manifest) error {
 	if m.Name == "" {
 		return fmt.Errorf("missing required field: name")
@@ -50,6 +57,11 @@ func Validate(m *Manifest) error {
 	}
 	if len(m.Files) == 0 {
 		return fmt.Errorf("files must contain at least one .sk file")
+	}
+	for _, p := range placeholders {
+		if m.Name == p || m.Description == p || m.Author == p || m.Repo == p {
+			return fmt.Errorf("skpm.json still contains placeholder values — fill it out before publishing")
+		}
 	}
 	return nil
 }
