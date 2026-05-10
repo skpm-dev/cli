@@ -90,9 +90,9 @@ func promptVersionBump(current string) (string, error) {
 		return "", fmt.Errorf("could not parse current version %q: %w", current, err)
 	}
 
-	patch := v.Bump(version.BumpPatch)
-	minor := v.Bump(version.BumpMinor)
-	major := v.Bump(version.BumpMajor)
+	patch := version.Bump(v, version.BumpPatch)
+	minor := version.Bump(v, version.BumpMinor)
+	major := version.Bump(v, version.BumpMajor)
 
 	fmt.Printf("\nFound existing package at version %s\n", current)
 	fmt.Printf("What type of release is this?\n")
