@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -63,7 +64,23 @@ func runPublish(cmd *cobra.Command, args []string) error {
 	fmt.Printf("Publishing %s@%s...\n", m.Name, m.Version)
 
 	if err := api.Publish(token, m, files); err != nil {
-		return fmt.Errorf("publish failed: %w", err)
+		if errors.Is(err, api.ErrVersionConflict) {
+			newVersion, err := promptVersionBump(m.Version)
+			if err != nil {
+				return err
+			}
+			m.Version = newVersion
+			if err := manifest.Save(m, "skpm.json"); err != nil {
+				return fmt.Errorf("could not update skpm.json: %w", err)
+			}
+			fmt.Printf("Bumped version to %s in skpm.json\n", m.Version)
+			fmt.Printf("Publishing %s@%s...\n", m.Name, m.Version)
+			if err := api.Publish(token, m, files); err != nil {
+				return fmt.Errorf("publish failed: %w", err)
+			}
+		} else {
+			return fmt.Errorf("publish failed: %w", err)
+		}
 	}
 
 	fmt.Printf("Published %s@%s\n", m.Name, m.Version)

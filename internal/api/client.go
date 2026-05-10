@@ -66,6 +66,10 @@ func Publish(token string, m *manifest.Manifest, files map[string]string) error 
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode == http.StatusConflict {
+		return ErrVersionConflict
+	}
+
 	if resp.StatusCode != http.StatusCreated {
 		b, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("registry returned %d: %s", resp.StatusCode, string(b))
@@ -73,3 +77,6 @@ func Publish(token string, m *manifest.Manifest, files map[string]string) error 
 
 	return nil
 }
+
+// ErrVersionConflict is returned when the version being published already has an open PR.
+var ErrVersionConflict = fmt.Errorf("version already has an open pull request")
