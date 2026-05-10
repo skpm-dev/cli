@@ -50,10 +50,6 @@ func runPublish(cmd *cobra.Command, args []string) error {
 			return err
 		}
 		m.Version = newVersion
-		if err := manifest.Save(m, "skpm.json"); err != nil {
-			return fmt.Errorf("could not update skpm.json: %w", err)
-		}
-		fmt.Printf("Bumped version to %s in skpm.json\n", m.Version)
 	}
 
 	files, err := readFiles(m.Files)
@@ -70,10 +66,6 @@ func runPublish(cmd *cobra.Command, args []string) error {
 				return err
 			}
 			m.Version = newVersion
-			if err := manifest.Save(m, "skpm.json"); err != nil {
-				return fmt.Errorf("could not update skpm.json: %w", err)
-			}
-			fmt.Printf("Bumped version to %s in skpm.json\n", m.Version)
 			fmt.Printf("Publishing %s@%s...\n", m.Name, m.Version)
 			if err := api.Publish(token, m, files); err != nil {
 				return fmt.Errorf("publish failed: %w", err)
@@ -81,6 +73,10 @@ func runPublish(cmd *cobra.Command, args []string) error {
 		} else {
 			return fmt.Errorf("publish failed: %w", err)
 		}
+	}
+
+	if err := manifest.Save(m, "skpm.json"); err != nil {
+		fmt.Fprintf(os.Stderr, "warning: published successfully but could not update skpm.json: %v\n", err)
 	}
 
 	fmt.Printf("Published %s@%s\n", m.Name, m.Version)
