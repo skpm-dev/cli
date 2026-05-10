@@ -80,3 +80,48 @@ func Publish(token string, m *manifest.Manifest, files map[string]string) error 
 
 // ErrVersionConflict is returned when the version being published already has an open PR.
 var ErrVersionConflict = fmt.Errorf("version already has an open pull request")
+
+// Yank marks a specific version as yanked in the registry.
+func Yank(adminToken, name, version, reason string) error {
+	url := fmt.Sprintf("%s/packages/%s/%s", registryURL, name, version)
+	return adminDelete(adminToken, url, reason)
+}
+
+// Remove hard-removes an entire package from the registry.
+func Remove(adminToken, name, reason string) error {
+	url := fmt.Sprintf("%s/packages/%s", registryURL, name)
+	return adminDelete(adminToken, url, reason)
+}
+
+func adminDelete(adminToken, url, reason string) error {
+	body := struct {
+		Reason string `json:"reason"`
+	}{Reason: reason}
+
+	data, err := json.Marshal(body)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest(http.MethodDelete, url, bytes.NewReader(data))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Authorization", "Bearer "+adminToken)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("could not reach registry: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusUnauthorized {
+		return fmt.Errorf("invalid admin token")
+	}
+	if resp.StatusCode != http.StatusOK {
+		b, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("registry returned %d: %s", resp.StatusCode, b)
+	}
+	return nil
+}
