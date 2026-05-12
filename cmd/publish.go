@@ -14,6 +14,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var bumpFlag string
+
 var publishCmd = &cobra.Command{
 	Use:   "publish",
 	Short: "Publish a package to the skpm registry",
@@ -22,6 +24,7 @@ var publishCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(publishCmd)
+	publishCmd.Flags().StringVar(&bumpFlag, "bump", "", "version bump type for CI: patch, minor, or major (skips interactive prompt)")
 }
 
 func runPublish(cmd *cobra.Command, args []string) error {
@@ -45,7 +48,7 @@ func runPublish(cmd *cobra.Command, args []string) error {
 	}
 
 	if existing != nil {
-		newVersion, err := promptVersionBump(existing.Latest)
+		newVersion, err := resolveVersionBump(existing.Latest, bumpFlag)
 		if err != nil {
 			return err
 		}
@@ -61,7 +64,7 @@ func runPublish(cmd *cobra.Command, args []string) error {
 
 	if err := api.Publish(token, m, files); err != nil {
 		if errors.Is(err, api.ErrVersionConflict) {
-			newVersion, err := promptVersionBump(m.Version)
+			newVersion, err := resolveVersionBump(m.Version, bumpFlag)
 			if err != nil {
 				return err
 			}
@@ -95,6 +98,27 @@ func readFiles(filenames []string) (map[string]string, error) {
 	}
 
 	return files, nil
+}
+
+// resolveVersionBump applies the --bump flag if set, otherwise falls through to the interactive prompt.
+func resolveVersionBump(current, bump string) (string, error) {
+	if bump == "" {
+		return promptVersionBump(current)
+	}
+	v, err := version.Parse(current)
+	if err != nil {
+		return "", fmt.Errorf("could not parse current version %q: %w", current, err)
+	}
+	switch bump {
+	case "patch":
+		return version.Bump(v, version.BumpPatch).String(), nil
+	case "minor":
+		return version.Bump(v, version.BumpMinor).String(), nil
+	case "major":
+		return version.Bump(v, version.BumpMajor).String(), nil
+	default:
+		return "", fmt.Errorf("--bump must be patch, minor, or major (got %q)", bump)
+	}
 }
 
 func promptVersionBump(current string) (string, error) {

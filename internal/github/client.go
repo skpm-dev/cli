@@ -14,7 +14,14 @@ type User struct {
 func Token() (string, error) {
 	token := os.Getenv("SKPM_GITHUB_TOKEN")
 	if token == "" {
-		return "", fmt.Errorf("SKPM_GITHUB_TOKEN is not set — add it to your .zshrc or .bashrc")
+		return "", fmt.Errorf(`SKPM_GITHUB_TOKEN is not set.
+
+To create a token:
+  1. Visit https://github.com/settings/tokens/new
+  2. Give it a name (e.g. "skpm")
+  3. Select scope: read:user
+  4. Click "Generate token" and copy the value
+  5. Add to your shell:  export SKPM_GITHUB_TOKEN=<token>`)
 	}
 	return token, nil
 }

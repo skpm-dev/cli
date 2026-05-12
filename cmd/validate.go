@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/skpm-dev/cli/internal/manifest"
 	"github.com/spf13/cobra"
@@ -28,5 +29,31 @@ func runValidate(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Println("skpm.json is valid")
+	fmt.Println()
+	fmt.Printf("  name:      %s\n", m.Name)
+	fmt.Printf("  version:   %s\n", m.Version)
+	fmt.Printf("  author:    %s\n", m.Author)
+	fmt.Printf("  repo:      %s\n", m.Repo)
+	if m.Skript != "" {
+		fmt.Printf("  skript:    %s\n", m.Skript)
+	}
+	if m.Minecraft != "" {
+		fmt.Printf("  minecraft: %s\n", m.Minecraft)
+	}
+	if len(m.Addons) > 0 {
+		fmt.Printf("  addons:\n")
+		for name, ver := range m.Addons {
+			fmt.Printf("    %s %s\n", name, ver)
+		}
+	}
+	fmt.Printf("\nfiles (%d):\n", len(m.Files))
+	for _, f := range m.Files {
+		info, err := os.Stat(f)
+		if err != nil {
+			fmt.Printf("  %-40s  (not found on disk)\n", f)
+		} else {
+			fmt.Printf("  %-40s  %d bytes\n", f, info.Size())
+		}
+	}
 	return nil
 }
