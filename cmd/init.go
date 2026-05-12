@@ -45,15 +45,16 @@ func runInit(cmd *cobra.Command, args []string) error {
 	}
 
 	m := map[string]any{
-		"name":        name,
-		"description": "A short description of your package",
-		"author":      author,
-		"version":     "1.0.0",
-		"repo":        repo,
-		"skript":      ">=2.7",
-		"minecraft":   ">=1.20",
-		"addons":      map[string]string{},
-		"files":       []string{"main.sk"},
+		"name":         name,
+		"description":  "A short description of your package",
+		"author":       author,
+		"version":      "1.0.0",
+		"repo":         repo,
+		"skript":       ">=2.7",
+		"minecraft":    ">=1.20",
+		"addons":       map[string]string{},
+		"dependencies": map[string]string{},
+		"files":        []string{"main.sk"},
 	}
 
 	data, err := json.MarshalIndent(m, "", "  ")

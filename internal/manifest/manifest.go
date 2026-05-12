@@ -7,15 +7,16 @@ import (
 )
 
 type Manifest struct {
-	Name        string            `json:"name"`
-	Description string            `json:"description"`
-	Author      string            `json:"author"`
-	Version     string            `json:"version"`
-	Repo        string            `json:"repo"`
-	Skript      string            `json:"skript"`
-	Minecraft   string            `json:"minecraft"`
-	Addons      map[string]string `json:"addons"`
-	Files       []string          `json:"files"`
+	Name         string            `json:"name"`
+	Description  string            `json:"description"`
+	Author       string            `json:"author"`
+	Version      string            `json:"version"`
+	Repo         string            `json:"repo"`
+	Skript       string            `json:"skript"`
+	Minecraft    string            `json:"minecraft"`
+	Addons       map[string]string `json:"addons"`
+	Dependencies map[string]string `json:"dependencies"`
+	Files        []string          `json:"files"`
 }
 
 func Load(path string) (*Manifest, error) {

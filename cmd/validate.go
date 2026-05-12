@@ -46,6 +46,12 @@ func runValidate(cmd *cobra.Command, args []string) error {
 			fmt.Printf("    %s %s\n", name, ver)
 		}
 	}
+	if len(m.Dependencies) > 0 {
+		fmt.Printf("  dependencies:\n")
+		for name, ver := range m.Dependencies {
+			fmt.Printf("    %s %s\n", name, ver)
+		}
+	}
 	fmt.Printf("\nfiles (%d):\n", len(m.Files))
 	for _, f := range m.Files {
 		info, err := os.Stat(f)
