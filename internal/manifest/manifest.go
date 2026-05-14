@@ -53,9 +53,6 @@ func Validate(m *Manifest) error {
 	if m.Version == "" {
 		return fmt.Errorf("missing required field: version")
 	}
-	if m.Repo == "" {
-		return fmt.Errorf("missing required field: repo")
-	}
 	if len(m.Files) == 0 {
 		return fmt.Errorf("files must contain at least one .sk file")
 	}
