@@ -17,7 +17,7 @@ func registryURL() string {
 	if u := os.Getenv("SKPM_REGISTRY_URL"); u != "" {
 		return u
 	}
-	return "https://skpm-registry-production.up.railway.app"
+	return "https://registry.skpm.org"
 }
 
 type publishRequest struct {
