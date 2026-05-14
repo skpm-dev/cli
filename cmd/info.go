@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/Masterminds/semver/v3"
 	"github.com/skpm-dev/cli/internal/api"
 	"github.com/spf13/cobra"
 )
@@ -48,6 +49,12 @@ func runInfo(cmd *cobra.Command, args []string) error {
 				fmt.Printf("    %s %s\n", addon, ver)
 			}
 		}
+		if len(v.Dependencies) > 0 {
+			fmt.Printf("  dependencies:\n")
+			for dep, ver := range v.Dependencies {
+				fmt.Printf("    %s %s\n", dep, ver)
+			}
+		}
 		if len(v.Files) > 0 {
 			fmt.Printf("  files:\n")
 			for _, f := range v.Files {
@@ -56,12 +63,30 @@ func runInfo(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	// Version history
+	// Version history, sorted by semver (invalid versions fall back to lexicographic last).
 	versions := make([]string, 0, len(pkg.Versions))
 	for v := range pkg.Versions {
 		versions = append(versions, v)
 	}
-	sort.Strings(versions)
+	parsed := make(map[string]*semver.Version, len(versions))
+	for _, v := range versions {
+		if sv, err := semver.NewVersion(v); err == nil {
+			parsed[v] = sv
+		}
+	}
+	sort.Slice(versions, func(i, j int) bool {
+		a, b := parsed[versions[i]], parsed[versions[j]]
+		if a == nil && b == nil {
+			return versions[i] < versions[j]
+		}
+		if a == nil {
+			return false
+		}
+		if b == nil {
+			return true
+		}
+		return a.LessThan(b)
+	})
 
 	fmt.Printf("\nversions (%d):\n", len(versions))
 	for i := len(versions) - 1; i >= 0; i-- {

@@ -5,11 +5,16 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/skpm-dev/cli/internal/github"
 	"github.com/spf13/cobra"
 )
+
+// reNonPackageChars matches any character not allowed in a registry package
+// name. Used to coerce a directory name into a publishable slug.
+var reNonPackageChars = regexp.MustCompile(`[^a-z0-9-]+`)
 
 var initCmd = &cobra.Command{
 	Use:   "init",
@@ -28,10 +33,18 @@ func runInit(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("%s already exists", path)
 	}
 
-	// Default name from the current directory name.
+	// Default name from the current directory name, coerced to the registry's
+	// allowed character set (^[a-z][a-z0-9-]{1,38}$).
 	name := "my-package"
 	if cwd, err := os.Getwd(); err == nil {
-		name = strings.ToLower(filepath.Base(cwd))
+		slug := reNonPackageChars.ReplaceAllString(strings.ToLower(filepath.Base(cwd)), "-")
+		slug = strings.Trim(slug, "-")
+		if len(slug) > 39 {
+			slug = slug[:39]
+		}
+		if slug != "" && slug[0] >= 'a' && slug[0] <= 'z' {
+			name = slug
+		}
 	}
 
 	// Try to pre-fill author and repo from the GitHub token.

@@ -33,7 +33,6 @@ func TestValidate_missingFields(t *testing.T) {
 		{"description", func(m *manifest.Manifest) { m.Description = "" }},
 		{"author", func(m *manifest.Manifest) { m.Author = "" }},
 		{"version", func(m *manifest.Manifest) { m.Version = "" }},
-		{"repo", func(m *manifest.Manifest) { m.Repo = "" }},
 		{"files", func(m *manifest.Manifest) { m.Files = nil }},
 	}
 

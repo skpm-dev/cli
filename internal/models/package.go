@@ -15,12 +15,13 @@ type FileEntry struct {
 }
 
 type VersionEntry struct {
-	Skript    string            `json:"skript"`
-	Minecraft string            `json:"minecraft"`
-	Addons    map[string]string `json:"addons"`
-	Files     []FileEntry       `json:"files"`
-	Yanked    bool              `json:"yanked,omitempty"`
-	Downloads int64             `json:"downloads,omitempty"`
+	Skript       string            `json:"skript"`
+	Minecraft    string            `json:"minecraft"`
+	Addons       map[string]string `json:"addons"`
+	Dependencies map[string]string `json:"dependencies,omitempty"`
+	Files        []FileEntry       `json:"files"`
+	Yanked       bool              `json:"yanked,omitempty"`
+	Downloads    int64             `json:"downloads,omitempty"`
 }
 
 type Package struct {
