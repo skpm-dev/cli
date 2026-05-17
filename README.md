@@ -53,7 +53,6 @@ Run `skpm init` or write it manually:
   "description": "A simple economy system for Skript servers",
   "author": "yourgithubusername",
   "version": "1.0.0",
-  "repo": "https://github.com/you/my-economy",
   "skript": ">=2.8.0",
   "minecraft": ">=1.20",
   "addons": {
@@ -71,7 +70,6 @@ Run `skpm init` or write it manually:
 | `description` | **Yes** | Short summary shown in search results |
 | `author` | **Yes** | Your GitHub username — tied to ownership |
 | `version` | **Yes** | Semver (`major.minor.patch`) |
-| `repo` | No | Link to the source repository |
 | `skript` | No | Semver constraint on required Skript version |
 | `minecraft` | No | Semver constraint on required Minecraft version |
 | `addons` | No | Map of required Skript addon → semver constraint |
