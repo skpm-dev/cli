@@ -4,7 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"regexp"
+
+	"github.com/Masterminds/semver/v3"
 )
+
+var rePackageName = regexp.MustCompile(`^[a-z][a-z0-9-]{1,38}$`)
 
 type Manifest struct {
 	Name         string            `json:"name"`
@@ -44,6 +49,9 @@ func Validate(m *Manifest) error {
 	if m.Name == "" {
 		return fmt.Errorf("missing required field: name")
 	}
+	if !rePackageName.MatchString(m.Name) {
+		return fmt.Errorf("invalid package name %q: must match ^[a-z][a-z0-9-]{1,38}$", m.Name)
+	}
 	if m.Description == "" {
 		return fmt.Errorf("missing required field: description")
 	}
@@ -53,12 +61,25 @@ func Validate(m *Manifest) error {
 	if m.Version == "" {
 		return fmt.Errorf("missing required field: version")
 	}
+	if _, err := semver.NewVersion(m.Version); err != nil {
+		return fmt.Errorf("invalid version %q: must be valid semver", m.Version)
+	}
 	if len(m.Files) == 0 {
 		return fmt.Errorf("files must contain at least one .sk file")
 	}
 	for _, p := range placeholders {
 		if m.Name == p || m.Description == p || m.Author == p || m.Repo == p {
 			return fmt.Errorf("skpm.json still contains placeholder values — fill it out before publishing")
+		}
+	}
+	for addon, constraint := range m.Addons {
+		if _, err := semver.NewConstraint(constraint); err != nil {
+			return fmt.Errorf("invalid semver constraint for addon %q: %q", addon, constraint)
+		}
+	}
+	for dep, constraint := range m.Dependencies {
+		if _, err := semver.NewConstraint(constraint); err != nil {
+			return fmt.Errorf("invalid semver constraint for dependency %q: %q", dep, constraint)
 		}
 	}
 	return nil

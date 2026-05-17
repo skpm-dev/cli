@@ -53,13 +53,18 @@ func runValidate(cmd *cobra.Command, args []string) error {
 		}
 	}
 	fmt.Printf("\nfiles (%d):\n", len(m.Files))
+	var missingFiles []string
 	for _, f := range m.Files {
 		info, err := os.Stat(f)
 		if err != nil {
 			fmt.Printf("  %-40s  (not found on disk)\n", f)
+			missingFiles = append(missingFiles, f)
 		} else {
 			fmt.Printf("  %-40s  %d bytes\n", f, info.Size())
 		}
+	}
+	if len(missingFiles) > 0 {
+		return fmt.Errorf("%d file(s) listed in skpm.json not found on disk", len(missingFiles))
 	}
 	return nil
 }
