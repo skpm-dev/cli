@@ -37,7 +37,6 @@ Add that line to `~/.zshrc` or `~/.bashrc` to persist it across sessions.
 | `skpm publish` | Publish the current package to the registry |
 | `skpm info <package>` | Show metadata and version history for a package |
 | `skpm search <query>` | Search the registry by name or description |
-| `skpm remove <package>` | Admin: hard-remove or yank a package version |
 | `skpm completion <shell>` | Generate shell completion (bash, zsh, fish, powershell) |
 
 ---
